@@ -1,1 +1,7 @@
-/node_modules
+node_modules/
+dist/
+*.log
+.DS_Store
+*.map
+public/js/bundle.js
+public/js/bundle.js.map
