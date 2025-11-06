@@ -1,6 +1,10 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -8,7 +12,11 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+
+// Servir les fichiers statiques depuis dist en production, public en développement
+const isProduction = process.env.NODE_ENV === 'production';
+const staticDir = isProduction ? 'dist' : 'public';
+app.use(express.static(path.join(__dirname, staticDir)));
 
 // Stockage simple des scores en mémoire (pourrait être remplacé par une base de données)
 let highScores = [];
@@ -33,7 +41,7 @@ app.post('/api/scores', (req, res) => {
 
 // Servir l'application principale
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, staticDir, 'index.html'));
 });
 
 app.listen(PORT, () => {
