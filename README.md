@@ -1,6 +1,6 @@
 # Jeu Tetris
 
-Un jeu Tetris classique avec toutes les fonctionnalités originales, développé avec Node.js et JavaScript vanilla.
+Un jeu Tetris classique avec toutes les fonctionnalités originales, développé avec Node.js, TypeScript et PixiJS (WebGL).
 
 ## Installation
 
@@ -9,15 +9,25 @@ Un jeu Tetris classique avec toutes les fonctionnalités originales, développé
    ```bash
    npm install
    ```
+3. Compilez le code TypeScript :
+   ```bash
+   npm run build
+   ```
 
 ## Lancement
 
 ```bash
-# Mode développement
-npm run dev
+# Compiler en mode développement (avec watch)
+npm run watch
 
-# Mode production
+# Compiler en mode production
+npm run build
+
+# Démarrer le serveur
 npm start
+
+# Mode développement avec recompilation automatique
+npm run dev
 ```
 
 Le jeu sera accessible à l'adresse : http://localhost:3000
@@ -48,16 +58,31 @@ Le jeu sera accessible à l'adresse : http://localhost:3000
 
 ```
 tetris/
+├── src/                    # Code source TypeScript
+│   ├── index.ts           # Point d'entrée principal
+│   ├── game.ts            # Logique principale du jeu
+│   ├── pieces.ts          # Définition des pièces
+│   ├── renderer.ts        # Rendu PixiJS/WebGL
+│   ├── controls.ts        # Gestion des contrôles
+│   ├── audio.ts           # Gestionnaire audio
+│   ├── particles.ts       # Système de particules PixiJS
+│   ├── themes.ts          # Gestionnaire de thèmes
+│   └── config.ts          # Configuration du jeu
 ├── public/
-│   ├── index.html          # Page principale
-│   ├── css/style.css       # Styles CSS
-│   ├── js/
-│   │   ├── game.js         # Logique principale du jeu
-│   │   ├── pieces.js       # Définition des pièces
-│   │   ├── render.js       # Rendu graphique
-│   │   └── controls.js     # Gestion des contrôles
-│   └── assets/             # Ressources (sons, images)
-├── server.js               # Serveur Node.js
-├── package.json            # Configuration npm
-└── README.md              # Documentation
+│   ├── index.html         # Page principale
+│   ├── css/style.css      # Styles CSS
+│   └── js/
+│       └── bundle.js      # Bundle compilé (généré)
+├── server.js              # Serveur Node.js
+├── package.json           # Configuration npm
+├── tsconfig.json          # Configuration TypeScript
+├── webpack.config.js      # Configuration Webpack
+└── README.md             # Documentation
 ```
+
+## Technologies utilisées
+
+- **TypeScript** : Typage statique
+- **PixiJS 7** : Rendu WebGL accéléré par GPU
+- **Webpack** : Bundler et compilation
+- **Node.js/Express** : Serveur backend
