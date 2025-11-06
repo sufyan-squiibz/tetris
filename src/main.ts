@@ -1,18 +1,21 @@
+import * as PIXI from 'pixi.js';
 import { TetrisGame } from './core/Game';
-import { TetrisRenderer } from './rendering/Renderer';
+import { EnhancedRenderer } from './rendering/EnhancedRenderer';
 import { ControlsManager } from './core/Controls';
 import { AudioManager } from './audio/AudioManager';
-import { ParticleSystem } from './effects/ParticleSystem';
+import { PixiParticleSystem } from './effects/PixiParticles';
+import { AnimationSystem } from './effects/AnimationSystem';
 import { ThemeManager } from './config/themes';
 import { UIManager } from './ui/UIManager';
 import { HighScore } from './types';
 
 class TetrisApp {
   private game: TetrisGame;
-  private renderer: TetrisRenderer;
+  private renderer: EnhancedRenderer;
   private controls: ControlsManager;
   private audio: AudioManager;
-  private particles: ParticleSystem;
+  private pixiParticles!: PixiParticleSystem;
+  private animations: AnimationSystem;
   private themeManager: ThemeManager;
   private ui: UIManager;
   private lastTime: number = 0;
@@ -20,10 +23,10 @@ class TetrisApp {
 
   constructor() {
     this.game = new TetrisGame();
-    this.renderer = new TetrisRenderer(document.getElementById('game-canvas') as HTMLCanvasElement);
+    this.renderer = new EnhancedRenderer(document.getElementById('game-canvas') as HTMLCanvasElement);
     this.controls = new ControlsManager(this.game);
     this.audio = new AudioManager();
-    this.particles = new ParticleSystem('particles-canvas');
+    this.animations = new AnimationSystem();
     this.themeManager = new ThemeManager();
     this.ui = new UIManager();
 
@@ -32,6 +35,17 @@ class TetrisApp {
 
   public async init(): Promise<void> {
     await this.renderer.init();
+    
+    // Initialize PixiJS particle system using renderer's container
+    const particlesContainer = new PIXI.Container();
+    this.renderer.getApp().stage.addChild(particlesContainer);
+    this.pixiParticles = new PixiParticleSystem(particlesContainer);
+    
+    // Start particle update loop
+    this.renderer.getApp().ticker.add((delta) => {
+      this.pixiParticles.update(delta);
+    });
+    
     this.controls.init();
     this.themeManager.applyTheme();
     this.game.updatePieceColors(this.themeManager.getPieceColors());
@@ -55,26 +69,49 @@ class TetrisApp {
     this.renderer.render(this.game);
     this.updateNextPiecesDisplay();
     this.updateHoldDisplay();
+    
+    console.log('🎮 Enhanced Tetris initialized with WebGL rendering!');
   }
 
   private setupGameCallbacks(): void {
-    this.game.onLinesClear = (lines, rows) => {
+    this.game.onLinesClear = async (lines, rows) => {
       this.audio.playSound('clear');
       
+      // Get board position for particles
+      const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
+      const boardRect = canvas.getBoundingClientRect();
+      const containerRect = canvas.getBoundingClientRect();
+      
+      const boardX = boardRect.left - containerRect.left;
+      const boardY = boardRect.top - containerRect.top;
+      const width = boardRect.width;
+      
+      // Create GPU-accelerated particle effects
       rows.forEach(row => {
-        const color = '#FFD700';
-        this.particles.createLineExplosion(row, color);
+        const color = 0xFFD700; // Gold color for cleared lines
+        this.pixiParticles.createLineExplosion(row, color, boardX, boardY, width);
       });
       
+      // Special Tetris explosion
       if (lines === 4) {
-        this.particles.createTetrisExplosion(rows, '#FFD700');
+        const centerX = boardX + width / 2;
+        const centerY = boardY + boardRect.height / 2;
+        this.pixiParticles.createTetrisExplosion(centerX, centerY, 0xFFD700);
+        
+        // Shake effect for impact
+        this.animations.shake(this.renderer.getApp().stage, 8, { duration: 0.4 });
       }
       
+      // Combo display with animation
       if (this.game.stats.combo > 1) {
         this.ui.showComboDisplay(this.game.stats.combo);
+        const centerX = boardX + width / 2;
+        const centerY = boardY + boardRect.height / 3;
+        this.pixiParticles.createComboEffect(centerX, centerY, this.game.stats.combo);
       }
       
-      this.renderer.animateLineClear(rows);
+      // Animated line clear
+      await this.renderer.animateLineClear(rows);
     };
 
     this.game.onPieceLock = () => {
@@ -85,12 +122,29 @@ class TetrisApp {
 
     this.game.onLevelUp = (_newLevel) => {
       this.audio.playSound('levelup');
-      this.particles.createLevelUpEffect();
+      
+      // Get board center for effects
+      const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
+      const boardRect = canvas.getBoundingClientRect();
+      const containerRect = canvas.getBoundingClientRect();
+      
+      const centerX = (boardRect.left - containerRect.left) + boardRect.width / 2;
+      const centerY = (boardRect.top - containerRect.top) + boardRect.height / 2;
+      
+      // Epic level up effect
+      this.pixiParticles.createLevelUpEffect(centerX, centerY);
+      this.animations.pulse(this.renderer.getApp().stage, { duration: 0.6 });
     };
 
     this.game.onGameOver = (stats) => {
       this.audio.playSound('gameover');
       this.ui.showGameOver(stats);
+      this.animations.fadeOut(this.renderer.getApp().stage, {
+        duration: 0.8,
+        onComplete: () => {
+          this.renderer.getApp().stage.alpha = 1;
+        }
+      });
     };
 
     this.game.onScoreUpdate = (stats) => {
