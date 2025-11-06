@@ -23,6 +23,14 @@ Un jeu Tetris moderne et performant développé avec **TypeScript** et **PixiJS*
 
 ## 📦 Installation
 
+## 🚀 Installation et Démarrage
+
+### Installation des dépendances
+```bash
+npm install
+```
+
+### Mode développement
 ```bash
 # Installer les dépendances
 npm install
@@ -41,6 +49,7 @@ node server.js
 # Terminal 2 : Vite dev server (port 3000)
 npm run dev
 ```
+Démarre le serveur Express pour l'API des scores sur le port 3001
 
 Puis ouvrez votre navigateur sur `http://localhost:3000`
 
