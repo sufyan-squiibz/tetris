@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Tetris Pro - TypeScript + PixiJS</title>
+    <link rel="stylesheet" href="/public/css/style.css">
+</head>
+<body>
+    <div class="game-container" id="game-container">
+        <header class="game-header">
+            <div>
+                <h1>TETRIS <span class="pro-badge">PRO</span></h1>
+            </div>
+            <div class="header-controls">
+                <button id="theme-btn" class="btn btn-small" title="Changer de thème">🎨</button>
+                <button id="fullscreen-btn" class="btn btn-small" title="Plein écran">⛶</button>
+                <button id="tutorial-btn" class="btn btn-small" title="Aide">❓</button>
+            </div>
+        </header>
+        
+        <main class="game-main">
+            <div class="game-left-panel">
+                <div class="hold-piece">
+                    <h3>RÉSERVE <kbd>C</kbd></h3>
+                    <canvas id="hold-canvas" width="100" height="100"></canvas>
+                    <p class="hold-hint">Appuyez sur C</p>
+                </div>
+                
+                <div class="statistics-panel">
+                    <h3>📊 STATS</h3>
+                    <div class="stat-item">
+                        <span>⏱️ Temps</span>
+                        <span id="time-played" class="stat-value">00:00</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>⚡ PPS</span>
+                        <span id="pps" class="stat-value">0.0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>🔥 Combo</span>
+                        <span id="combo" class="stat-value combo-highlight">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>🏆 Max Combo</span>
+                        <span id="max-combo" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>💎 Tetris</span>
+                        <span id="tetris-count" class="stat-value">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-board">
+                <canvas id="game-canvas" width="300" height="600"></canvas>
+                <div class="combo-display" id="combo-display"></div>
+            </div>
+            
+            <div class="game-sidebar">
+                <div class="next-pieces">
+                    <h3>SUIVANTES</h3>
+                    <div class="next-piece-container">
+                        <canvas id="next-canvas-1" width="100" height="100"></canvas>
+                    </div>
+                    <div class="next-piece-container small">
+                        <canvas id="next-canvas-2" width="80" height="80"></canvas>
+                    </div>
+                    <div class="next-piece-container small">
+                        <canvas id="next-canvas-3" width="80" height="80"></canvas>
+                    </div>
+                </div>
+                
+                <div class="game-stats">
+                    <div class="stat">
+                        <span>SCORE</span>
+                        <span id="score" class="score-value">0</span>
+                    </div>
+                    <div class="stat">
+                        <span>NIVEAU</span>
+                        <span id="level" class="level-value">1</span>
+                    </div>
+                    <div class="stat">
+                        <span>LIGNES</span>
+                        <span id="lines">0</span>
+                    </div>
+                    <div class="stat">
+                        <span>OBJECTIF</span>
+                        <span id="goal">10</span>
+                    </div>
+                    <div class="level-progress">
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="game-controls">
+                    <button id="start-btn" class="btn btn-primary">▶ DÉMARRER</button>
+                    <button id="pause-btn" class="btn btn-secondary" disabled>⏸ PAUSE</button>
+                    <button id="reset-btn" class="btn btn-danger">🔄 RESET</button>
+                </div>
+                
+                <div class="sensitivity-control">
+                    <h3>⚙️ SENSIBILITÉ</h3>
+                    <div class="sensitivity-slider">
+                        <label for="sensitivity-range">Déplacement</label>
+                        <input type="range" id="sensitivity-range" min="10" max="100" value="30" step="5">
+                        <span id="sensitivity-value">30ms</span>
+                    </div>
+                    <div class="sensitivity-presets">
+                        <button class="preset-btn" data-value="10">Très rapide</button>
+                        <button class="preset-btn active" data-value="30">Normal</button>
+                        <button class="preset-btn" data-value="50">Lent</button>
+                    </div>
+                </div>
+                
+                <div class="high-scores">
+                    <h3>🏆 TOP 5</h3>
+                    <ul id="high-scores-list"></ul>
+                </div>
+            </div>
+        </main>
+        
+        <div class="game-over" id="game-over" style="display: none;">
+            <div class="game-over-content">
+                <h2>GAME OVER</h2>
+                <div class="final-score-display">
+                    <span class="final-score-label">Score Final</span>
+                    <span id="final-score" class="final-score-value">0</span>
+                </div>
+                <div class="final-stats">
+                    <div class="final-stat">
+                        <span>🎯 Niveau</span>
+                        <span id="final-level">1</span>
+                    </div>
+                    <div class="final-stat">
+                        <span>📏 Lignes</span>
+                        <span id="final-lines">0</span>
+                    </div>
+                    <div class="final-stat">
+                        <span>⏱️ Temps</span>
+                        <span id="final-time">00:00</span>
+                    </div>
+                    <div class="final-stat">
+                        <span>🔥 Max Combo</span>
+                        <span id="final-max-combo">0</span>
+                    </div>
+                    <div class="final-stat">
+                        <span>💎 Tetris</span>
+                        <span id="final-tetris">0</span>
+                    </div>
+                </div>
+                <div class="name-input">
+                    <input type="text" id="player-name" placeholder="Entrez votre nom" maxlength="10">
+                    <button id="save-score-btn" class="btn btn-primary">💾 SAUVEGARDER</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="pause-screen" id="pause-screen" style="display: none;">
+            <h2>⏸ PAUSE</h2>
+            <p>Appuyez sur <kbd>P</kbd> pour continuer</p>
+        </div>
+        
+        <div class="tutorial-overlay" id="tutorial-overlay" style="display: none;">
+            <div class="tutorial-content">
+                <button class="close-tutorial" id="close-tutorial-btn">✕</button>
+                <h2>🎮 Comment jouer à Tetris Pro</h2>
+                
+                <div class="tutorial-grid">
+                    <div class="tutorial-section">
+                        <h3>⌨️ Contrôles de base</h3>
+                        <ul class="controls-list">
+                            <li><kbd>←</kbd> <kbd>→</kbd> Déplacer latéralement</li>
+                            <li><kbd>↓</kbd> Descente rapide (soft drop)</li>
+                            <li><kbd>↑</kbd> Rotation horaire</li>
+                            <li><kbd>Z</kbd> Rotation anti-horaire</li>
+                            <li><kbd>Espace</kbd> / <kbd>Entrée</kbd> Chute immédiate (hard drop)</li>
+                            <li><kbd>C</kbd> Hold - Mettre en réserve</li>
+                            <li><kbd>P</kbd> Pause</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tutorial-section">
+                        <h3>💯 Scoring</h3>
+                        <ul class="scoring-list">
+                            <li><strong>1 ligne</strong> = 100 pts × niveau</li>
+                            <li><strong>2 lignes</strong> = 300 pts × niveau</li>
+                            <li><strong>3 lignes</strong> = 500 pts × niveau</li>
+                            <li><strong>4 lignes (Tetris)</strong> = 800 pts × niveau</li>
+                            <li><strong>Combo</strong> = +50 pts par ligne consécutive</li>
+                            <li><strong>Hard Drop</strong> = +2 pts par cellule</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tutorial-section">
+                        <h3>🎯 Objectifs</h3>
+                        <ul>
+                            <li>Complétez des lignes pour marquer des points</li>
+                            <li>Faites des Tetris (4 lignes) pour maximiser le score</li>
+                            <li>Maintenez un combo pour des points bonus</li>
+                            <li>Utilisez le HOLD stratégiquement</li>
+                            <li>Atteignez le niveau 15 pour gagner !</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tutorial-section">
+                        <h3>✨ Fonctionnalités Pro</h3>
+                        <ul>
+                            <li><strong>Ghost Piece</strong> : Ombre indiquant où la pièce tombera</li>
+                            <li><strong>Hold</strong> : Réservez une pièce pour plus tard</li>
+                            <li><strong>Preview</strong> : Voyez les 3 prochaines pièces</li>
+                            <li><strong>Stats</strong> : Suivez vos performances en temps réel</li>
+                            <li><strong>Thèmes</strong> : Changez l'apparence du jeu</li>
+                            <li><strong>Sensibilité</strong> : Ajustez la réactivité des contrôles</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <button id="start-tutorial-btn" class="btn btn-primary btn-large">🚀 Commencer à jouer !</button>
+            </div>
+        </div>
+        
+        <canvas id="particles-canvas"></canvas>
+    </div>
+
+    <!-- Chargement du bundle TypeScript compilé -->
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

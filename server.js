@@ -3,12 +3,12 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Stockage simple des scores en mémoire (pourrait être remplacé par une base de données)
 let highScores = [];
@@ -31,12 +31,7 @@ app.post('/api/scores', (req, res) => {
   res.json({ success: true, highScores });
 });
 
-// Servir l'application principale
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
 app.listen(PORT, () => {
-  console.log(`Serveur Tetris démarré sur le port ${PORT}`);
-  console.log(`Accédez à http://localhost:${PORT}`);
+  console.log(`Serveur API Tetris démarré sur le port ${PORT}`);
+  console.log(`API disponible sur http://localhost:${PORT}/api`);
 });
