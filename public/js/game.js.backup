@@ -1,0 +1,365 @@
+// Configuration du jeu
+const COLS = 10;
+const ROWS = 20;
+const BLOCK_SIZE = 30;
+
+class TetrisGame {
+    constructor() {
+        this.board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+        this.currentPiece = null;
+        this.nextPiece = null;
+        this.gameOver = false;
+        this.paused = false;
+        this.score = 0;
+        this.level = 1;
+        this.lines = 0;
+        this.dropInterval = 1000;
+        this.dropCounter = 0;
+        this.lastTime = 0;
+        this.highScores = [];
+        
+        this.init();
+        this.loadHighScores();
+    }
+
+    init() {
+        this.board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+        this.currentPiece = getRandomPiece();
+        this.nextPiece = getRandomPiece();
+        this.gameOver = false;
+        this.paused = false;
+        this.score = 0;
+        this.level = 1;
+        this.lines = 0;
+        this.dropInterval = 1000;
+        
+        this.updateStats();
+    }
+
+    update(time = 0) {
+        const deltaTime = time - this.lastTime;
+        this.lastTime = time;
+
+        if (this.paused || this.gameOver) return;
+
+        this.dropCounter += deltaTime;
+        if (this.dropCounter > this.dropInterval) {
+            this.dropPiece();
+            this.dropCounter = 0;
+        }
+
+        this.draw();
+        requestAnimationFrame(this.update.bind(this));
+    }
+
+    dropPiece(isManual = false) {
+        this.currentPiece.y++;
+        if (this.checkCollision()) {
+            this.currentPiece.y--;
+            this.lockPiece();
+            this.clearLines();
+            this.spawnPiece();
+            if (window.audioManager) {
+                audioManager.playSound('drop');
+            }
+            return true;
+        }
+        if (isManual && window.audioManager) {
+            audioManager.playSound('move');
+        }
+        return false;
+    }
+
+    movePiece(dx) {
+        this.currentPiece.x += dx;
+        if (this.checkCollision()) {
+            this.currentPiece.x -= dx;
+            return false;
+        }
+        if (window.audioManager) {
+            audioManager.playSound('move');
+        }
+        return true;
+    }
+
+    rotatePiece() {
+        const originalRotation = this.currentPiece.rotation;
+        this.currentPiece.rotate();
+        if (this.checkCollision()) {
+            this.currentPiece.rotation = originalRotation;
+            return false;
+        }
+        if (window.audioManager) {
+            audioManager.playSound('rotate');
+        }
+        return true;
+    }
+
+    rotatePieceReverse() {
+        const originalRotation = this.currentPiece.rotation;
+        this.currentPiece.rotateReverse();
+        if (this.checkCollision()) {
+            this.currentPiece.rotation = originalRotation;
+            return false;
+        }
+        if (window.audioManager) {
+            audioManager.playSound('rotate');
+        }
+        return true;
+    }
+
+    hardDrop() {
+        while (!this.checkCollision()) {
+            this.currentPiece.y++;
+        }
+        this.currentPiece.y--;
+        this.lockPiece();
+        this.clearLines();
+        this.spawnPiece();
+        if (window.audioManager) {
+            audioManager.playSound('drop');
+        }
+    }
+
+    checkCollision() {
+        const shape = this.currentPiece.getShape();
+        
+        for (let y = 0; y < shape.length; y++) {
+            for (let x = 0; x < shape[y].length; x++) {
+                if (shape[y][x] !== 0) {
+                    const boardX = this.currentPiece.x + x;
+                    const boardY = this.currentPiece.y + y;
+
+                    if (boardX < 0 || boardX >= COLS || 
+                        boardY >= ROWS || 
+                        (boardY >= 0 && this.board[boardY][boardX] !== 0)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    lockPiece() {
+        const shape = this.currentPiece.getShape();
+        
+        for (let y = 0; y < shape.length; y++) {
+            for (let x = 0; x < shape[y].length; x++) {
+                if (shape[y][x] !== 0) {
+                    const boardY = this.currentPiece.y + y;
+                    const boardX = this.currentPiece.x + x;
+                    
+                    if (boardY >= 0) {
+                        this.board[boardY][boardX] = this.currentPiece.color;
+                    }
+                }
+            }
+        }
+    }
+
+    clearLines() {
+        let linesCleared = 0;
+        
+        for (let y = ROWS - 1; y >= 0; y--) {
+            if (this.board[y].every(cell => cell !== 0)) {
+                this.board.splice(y, 1);
+                this.board.unshift(Array(COLS).fill(0));
+                linesCleared++;
+                y++; // Re-check the same row
+            }
+        }
+
+        if (linesCleared > 0) {
+            this.updateScore(linesCleared);
+        }
+        return linesCleared;
+    }
+
+    updateScore(linesCleared) {
+        const points = [0, 100, 300, 500, 800];
+        this.score += points[linesCleared] * this.level;
+        this.lines += linesCleared;
+        
+        const previousLevel = this.level;
+        this.level = Math.floor(this.lines / 10) + 1;
+        this.dropInterval = Math.max(100, 1000 - (this.level - 1) * 100);
+        
+        this.updateStats();
+        if (window.audioManager) {
+            audioManager.playSound('clear');
+            if (this.level > previousLevel) {
+                audioManager.playSound('levelup');
+            }
+        }
+    }
+
+    spawnPiece() {
+        this.currentPiece = this.nextPiece;
+        this.nextPiece = getRandomPiece();
+        
+        if (this.checkCollision()) {
+            this.gameOver = true;
+            this.showGameOver();
+        }
+    }
+
+    updateStats() {
+        document.getElementById('score').textContent = this.score;
+        document.getElementById('level').textContent = this.level;
+        document.getElementById('lines').textContent = this.lines;
+    }
+
+    showGameOver() {
+        document.getElementById('game-over').style.display = 'block';
+        document.getElementById('final-score').textContent = this.score;
+        
+        // Pré-remplir le nom du joueur si disponible
+        const savedName = localStorage.getItem('tetris-player-name');
+        if (savedName) {
+            document.getElementById('player-name').value = savedName;
+        }
+        if (window.audioManager) {
+            audioManager.playSound('gameover');
+        }
+    }
+
+    async loadHighScores() {
+        try {
+            const response = await fetch('/api/scores');
+            this.highScores = await response.json();
+            this.displayHighScores();
+        } catch (error) {
+            console.error('Erreur lors du chargement des scores:', error);
+            this.highScores = [];
+        }
+    }
+
+    async saveScore(name, score, level, lines) {
+        try {
+            const response = await fetch('/api/scores', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, score, level, lines })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                this.highScores = result.highScores;
+                this.displayHighScores();
+                
+                // Sauvegarder le nom du joueur
+                localStorage.setItem('tetris-player-name', name);
+                
+                alert('Score sauvegardé avec succès!');
+            } else {
+                alert('Erreur lors de la sauvegarde du score');
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            alert('Erreur de connexion au serveur');
+        }
+    }
+
+    displayHighScores() {
+        const scoresList = document.getElementById('high-scores-list');
+        scoresList.innerHTML = '';
+
+        this.highScores.slice(0, 5).forEach((score, index) => {
+            const li = document.createElement('li');
+            
+            const rank = document.createElement('span');
+            rank.textContent = `${index + 1}.`;
+            rank.style.fontWeight = 'bold';
+            rank.style.color = '#f39c12';
+            
+            const name = document.createElement('span');
+            name.textContent = score.name;
+            
+            const scoreValue = document.createElement('span');
+            scoreValue.textContent = score.score.toLocaleString();
+            scoreValue.style.color = '#27ae60';
+            
+            li.appendChild(rank);
+            li.appendChild(name);
+            li.appendChild(scoreValue);
+            
+            scoresList.appendChild(li);
+        });
+
+        if (this.highScores.length === 0) {
+            const li = document.createElement('li');
+            li.textContent = 'Aucun score enregistré';
+            li.style.textAlign = 'center';
+            li.style.color = '#bdc3c7';
+            scoresList.appendChild(li);
+        }
+    }
+
+    isHighScore(score) {
+        return this.highScores.length < 10 || score > this.highScores[this.highScores.length - 1]?.score;
+    }
+
+    togglePause() {
+        this.paused = !this.paused;
+        document.getElementById('pause-screen').style.display = this.paused ? 'block' : 'none';
+    }
+
+    resetGame() {
+        this.init();
+        document.getElementById('game-over').style.display = 'none';
+        document.getElementById('pause-screen').style.display = 'none';
+        this.update();
+    }
+
+    draw() {
+        // Le rendu sera géré par render.js
+    }
+}
+
+// Initialisation du jeu après le chargement du DOM
+document.addEventListener('DOMContentLoaded', () => {
+    let game = new TetrisGame();
+    
+    // Événements de contrôle
+    document.getElementById('start-btn').addEventListener('click', () => {
+        if (!game.gameOver && !game.paused) {
+            game.update();
+        }
+    });
+
+    document.getElementById('pause-btn').addEventListener('click', () => {
+        game.togglePause();
+        document.getElementById('pause-btn').textContent = game.paused ? 'REPRENDRE' : 'PAUSE';
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+        game.resetGame();
+    });
+
+    // Initialiser les contrôles clavier
+    initControls(game);
+
+    // Événement pour sauvegarder le score
+    document.getElementById('save-score-btn').addEventListener('click', () => {
+        const name = document.getElementById('player-name').value.trim();
+        
+        if (!name) {
+            alert('Veuillez entrer votre nom');
+            return;
+        }
+
+        if (game.isHighScore(game.score)) {
+            game.saveScore(name, game.score, game.level, game.lines);
+        } else {
+            alert('Votre score n\'est pas assez élevé pour le classement');
+        }
+        
+        document.getElementById('game-over').style.display = 'none';
+    });
+
+    // Rendu initial
+    game.draw();
+});
