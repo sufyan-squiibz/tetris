@@ -1,26 +1,27 @@
-# 🎮 Tetris Pro - TypeScript + PixiJS Edition
+# Tetris Pro - TypeScript + PixiJS Edition
 
-Jeu Tetris moderne développé avec **TypeScript** et **PixiJS (WebGL)** pour des performances optimales.
+Un jeu Tetris moderne et performant développé avec **TypeScript** et **PixiJS** pour un rendu WebGL accéléré par GPU.
 
-## ✨ Caractéristiques
+## 🚀 Fonctionnalités
 
-### Technologies
-- 🔷 **TypeScript** - Code typé et sécurisé
-- 🎨 **PixiJS** - Rendu WebGL haute performance
-- ⚡ **Vite** - Build system ultra-rapide
-- 🎯 **Architecture modulaire** - Code organisé et maintenable
+### Gameplay
+- ✅ Toutes les mécaniques classiques de Tetris
+- 👻 **Ghost Piece** - Aperçu de l'emplacement de chute
+- 🎯 **Hold System** - Réserve une pièce pour plus tard
+- 👀 **Preview** - Visualisation des 3 prochaines pièces
+- 🎮 **Contrôles réactifs** avec sensibilité ajustable
+- 🏆 **Système de scoring** avancé avec combos et back-to-back Tetris
 
-### Fonctionnalités du jeu
-- 🎮 Contrôles fluides et réactifs avec sensibilité ajustable
-- 👻 Ghost piece (prévisualisation de la chute)
-- 📦 Système de Hold (réserve de pièce)
-- 👁️ Prévisualisation de 3 pièces suivantes
-- 🎨 Système de thèmes (Classique, Néon, Rétro, Sombre)
-- 📊 Statistiques en temps réel (PPS, combos, temps)
-- 🏆 Système de high scores avec API
-- ✨ Effets visuels et particules
-- 🔊 Sons et musique (Web Audio API)
-- 📱 Responsive et plein écran
+### Technique
+- 💻 **TypeScript** - Code typé et maintenable
+- 🎨 **PixiJS v7** - Rendu WebGL haute performance
+- ⚡ **Vite** - Build ultra-rapide et HMR
+- 🎭 **4 Thèmes visuels** - Classique, Néon, Rétro, Sombre
+- 🎵 **Système audio** avec sons synthétisés
+- ✨ **Système de particules** pour les effets visuels
+- 📊 **Statistiques en temps réel** - PPS, combos, temps de jeu
+
+## 📦 Installation
 
 ## 🚀 Installation et Démarrage
 
@@ -31,149 +32,169 @@ npm install
 
 ### Mode développement
 ```bash
+# Installer les dépendances
+npm install
+```
+
+## 🎮 Utilisation
+
+### Mode Développement
+
+Démarrez le serveur de développement avec hot-reload :
+
+```bash
+# Terminal 1 : Serveur API (port 3001)
+node server.js
+
+# Terminal 2 : Vite dev server (port 3000)
 npm run dev
-```
-Le jeu sera accessible sur `http://localhost:5173`
-
-### Build de production
-```bash
-npm run build
-```
-Les fichiers optimisés seront générés dans le dossier `dist/`
-
-### Prévisualisation du build
-```bash
-npm run preview
-```
-
-### Serveur API (scores)
-```bash
-npm run server
 ```
 Démarre le serveur Express pour l'API des scores sur le port 3001
 
-## 📂 Structure du projet
+Puis ouvrez votre navigateur sur `http://localhost:3000`
 
-```
-/workspace
-├── src/                    # Code source TypeScript
-│   ├── main.ts            # Point d'entrée principal
-│   ├── game.ts            # Logique du jeu
-│   ├── renderer.ts        # Rendu PixiJS/WebGL
-│   ├── pieces.ts          # Définition des pièces Tetris
-│   ├── controls.ts        # Gestion des contrôles clavier
-│   ├── themes.ts          # Système de thèmes
-│   ├── particles.ts       # Système de particules
-│   ├── audio.ts           # Gestionnaire audio
-│   ├── ui.ts              # Gestion de l'interface
-│   ├── types.ts           # Types TypeScript
-│   └── constants.ts       # Constantes du jeu
-├── public/                 # Fichiers statiques
-│   ├── css/
-│   │   └── style.css      # Styles CSS
-│   └── index.html         # HTML (ancien, pour référence)
-├── index.html             # Nouveau HTML pour Vite
-├── dist/                  # Build de production (généré)
-├── server.js              # Serveur Express pour l'API
-├── tsconfig.json          # Configuration TypeScript
-├── vite.config.ts         # Configuration Vite
-└── package.json           # Dépendances NPM
+### Mode Production
+
+Compilez le projet pour la production :
+
+```bash
+# Build
+npm run build
+
+# Preview du build
+npm run preview
 ```
 
-## 🎮 Contrôles
+## ⌨️ Contrôles
 
 | Touche | Action |
 |--------|--------|
-| ← → | Déplacer latéralement |
-| ↓ | Descente rapide (soft drop) |
-| ↑ | Rotation horaire |
-| Z | Rotation anti-horaire |
-| Espace / Entrée | Chute immédiate (hard drop) |
-| C | Hold - Mettre en réserve |
-| P | Pause |
+| `←` `→` | Déplacer latéralement |
+| `↓` | Descente rapide (soft drop) |
+| `↑` | Rotation horaire |
+| `Z` | Rotation anti-horaire |
+| `Espace` / `Entrée` | Chute immédiate (hard drop) |
+| `C` | Hold - Mettre en réserve |
+| `P` | Pause |
 
-## 💯 Système de scoring
+## 📁 Structure du Projet
 
-- **1 ligne** = 100 pts × niveau
-- **2 lignes** = 300 pts × niveau
-- **3 lignes** = 500 pts × niveau
-- **4 lignes (Tetris)** = 800 pts × niveau
-- **Combo** = +50 pts par ligne consécutive
-- **Hard Drop** = +2 pts par cellule
-- **Back-to-Back Tetris** = ×1.5 multiplicateur
+```
+/workspace
+├── src/
+│   ├── core/           # Logique du jeu
+│   │   ├── Game.ts     # Classe principale du jeu
+│   │   ├── Piece.ts    # Définition des pièces
+│   │   ├── PieceFactory.ts
+│   │   └── Controls.ts # Gestion des contrôles
+│   ├── rendering/      # Système de rendu PixiJS
+│   │   └── Renderer.ts
+│   ├── audio/          # Gestion du son
+│   │   └── AudioManager.ts
+│   ├── effects/        # Effets visuels
+│   │   └── ParticleSystem.ts
+│   ├── ui/             # Interface utilisateur
+│   │   └── UIManager.ts
+│   ├── config/         # Configuration
+│   │   ├── constants.ts
+│   │   └── themes.ts
+│   ├── types/          # Types TypeScript
+│   │   └── index.ts
+│   └── main.ts         # Point d'entrée
+├── public/
+│   ├── css/
+│   │   └── style.css
+│   └── index.html
+├── server.js           # Serveur Express pour l'API
+├── vite.config.ts      # Configuration Vite
+├── tsconfig.json       # Configuration TypeScript
+└── package.json
+```
 
-## 🔧 Configuration
+## 🎯 Architecture
 
-### Sensibilité des contrôles
-Ajustable dans l'interface (10ms - 100ms)
-- Très rapide: 10ms
-- Normal: 30ms
-- Lent: 50ms
+### Game Engine
+Le moteur de jeu est divisé en modules indépendants :
+- **Game** : Gestion de l'état du jeu et de la logique
+- **Renderer** : Rendu WebGL via PixiJS
+- **Controls** : Gestion des entrées clavier
+- **AudioManager** : Synthèse audio en temps réel
+- **ParticleSystem** : Effets visuels Canvas 2D
+- **UIManager** : Mise à jour de l'interface
 
-### Thèmes disponibles
-1. **Classique** - Couleurs originales du Tetris
-2. **Néon** - Style cyberpunk avec effets glow
-3. **Rétro** - Style Game Boy monochrome
-4. **Sombre** - Design moderne et élégant
+### Système de Rendu
+- **PixiJS** pour le plateau de jeu (WebGL)
+- **Canvas 2D** pour les particules
+- Cache de graphiques pour optimiser les performances
+- Animations fluides avec `requestAnimationFrame`
 
-## 🛠️ Technologies utilisées
+## 🔧 Technologies Utilisées
 
-- **TypeScript 5.9+** - Langage de programmation
-- **PixiJS 8.0+** - Bibliothèque de rendu WebGL
-- **Vite 7.0+** - Build tool et dev server
-- **Express 4.18+** - Serveur API backend
-- **Web Audio API** - Sons et musique
-- **Canvas API** - Rendu des previews (fallback)
+- **TypeScript 5.3** - Langage
+- **PixiJS 7.3** - Moteur de rendu WebGL
+- **Vite 5.0** - Build tool et dev server
+- **Express 4.18** - Serveur API
+- **Web Audio API** - Synthèse sonore
 
-## 📊 Statistiques en temps réel
+## 📊 Système de Scoring
 
-- ⏱️ **Temps de jeu** - Chronomètre
-- ⚡ **PPS** - Pièces par seconde
-- 🔥 **Combo** - Lignes consécutives effacées
-- 🏆 **Max Combo** - Record de combo
-- 💎 **Tetris** - Nombre de 4 lignes
+| Action | Points |
+|--------|--------|
+| 1 ligne | 100 × niveau |
+| 2 lignes | 300 × niveau |
+| 3 lignes | 500 × niveau |
+| 4 lignes (Tetris) | 800 × niveau |
+| Combo | +50 × niveau par ligne consécutive |
+| Hard Drop | +2 par cellule |
+| Back-to-Back Tetris | ×1.5 multiplicateur |
 
-## 🎯 Migration depuis JavaScript
+## 🎨 Thèmes
 
-Ce projet a été migré depuis une version JavaScript vers TypeScript + PixiJS pour :
-- ✅ Meilleure maintenabilité avec le typage
-- ✅ Performances accrues avec WebGL
-- ✅ Architecture plus modulaire
-- ✅ Développement plus rapide avec Vite
-- ✅ Moins d'erreurs grâce au typage statique
+4 thèmes visuels sont disponibles :
+- **Classique** - Couleurs vives traditionnelles
+- **Néon** - Style cyberpunk avec effets lumineux
+- **Rétro** - Inspiré de la Game Boy
+- **Sombre** - Palette moderne et sobre
 
-## 📝 Notes de développement
+## 🚀 Performance
 
-### Avantages de PixiJS sur Canvas natif
-- Rendu GPU accéléré (WebGL)
-- Meilleure gestion des sprites et textures
-- Optimisations automatiques
-- API plus intuitive
-- Support multi-plateforme
+- Rendu WebGL via PixiJS pour des performances maximales
+- 60 FPS constant même avec de nombreuses particules
+- Cache des graphiques pour réduire les allocations mémoire
+- Code TypeScript optimisé et type-safe
 
-### Architecture TypeScript
-- Types stricts pour éviter les erreurs
-- Interfaces claires pour chaque composant
-- Séparation des responsabilités
-- Code auto-documenté
-- Refactoring facilité
+## 📝 Scripts NPM
 
-## 🐛 Débogage
+```bash
+npm run dev      # Serveur de développement
+npm run build    # Build production
+npm run preview  # Preview du build
+npm start        # Démarrer le serveur API uniquement
+```
 
-Les objets suivants sont exposés globalement en mode développement :
-- `window.game` - Instance du jeu
-- `window.renderer` - Renderer PixiJS
-- `window.themeManager` - Gestionnaire de thèmes
-- `window.audioManager` - Gestionnaire audio
+## 🐛 Debug
+
+L'application expose un objet global `tetrisApp` dans la console pour le débogage :
+
+```javascript
+// Dans la console du navigateur
+tetrisApp.game.stats  // Voir les statistiques
+tetrisApp.game.board  // Voir l'état du plateau
+```
 
 ## 📄 Licence
 
-MIT License
+MIT
 
-## 👨‍💻 Auteur
+## 🎮 Améliorations Futures
 
-Projet Tetris Pro - Édition TypeScript + PixiJS
+- [ ] Mode multijoueur en ligne
+- [ ] Replays et sauvegarde de parties
+- [ ] Challenges quotidiens
+- [ ] Leaderboards globaux
+- [ ] Support mobile avec contrôles tactiles
+- [ ] Plus de modes de jeu (Sprint, Marathon, etc.)
 
 ---
 
-**Bon jeu ! 🎮✨**
+**Développé avec ❤️ en TypeScript + PixiJS**

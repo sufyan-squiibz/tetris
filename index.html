@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Tetris Pro - Édition Ultime (TypeScript + PixiJS)</title>
-    <link rel="stylesheet" href="public/css/style.css">
+    <title>Tetris Pro - TypeScript + PixiJS</title>
+    <link rel="stylesheet" href="/public/css/style.css">
 </head>
 <body>
     <div class="game-container" id="game-container">
@@ -110,8 +110,8 @@
                     </div>
                     <div class="sensitivity-presets">
                         <button class="preset-btn" data-value="10">Très rapide</button>
-                        <button class="preset-btn" data-value="30">Normal</button>
-                        <button class="preset-btn active" data-value="50">Lent</button>
+                        <button class="preset-btn active" data-value="30">Normal</button>
+                        <button class="preset-btn" data-value="50">Lent</button>
                     </div>
                 </div>
                 
@@ -225,7 +225,7 @@
         <canvas id="particles-canvas"></canvas>
     </div>
 
-    <!-- Module TypeScript principal -->
+    <!-- Chargement du bundle TypeScript compilé -->
     <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
