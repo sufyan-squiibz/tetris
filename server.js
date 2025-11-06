@@ -8,7 +8,20 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+
+// Servir les fichiers statiques du dossier dist (généré par webpack)
+// Si dist n'existe pas, servir depuis public (développement)
+const distPath = path.join(__dirname, 'dist');
+const publicPath = path.join(__dirname, 'public');
+const fs = require('fs');
+
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  console.log('Serving static files from dist/');
+} else {
+  app.use(express.static(publicPath));
+  console.log('Serving static files from public/');
+}
 
 // Stockage simple des scores en mémoire (pourrait être remplacé par une base de données)
 let highScores = [];
@@ -33,7 +46,14 @@ app.post('/api/scores', (req, res) => {
 
 // Servir l'application principale
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  const distIndex = path.join(__dirname, 'dist', 'index.html');
+  const publicIndex = path.join(__dirname, 'public', 'index.html');
+  
+  if (fs.existsSync(distIndex)) {
+    res.sendFile(distIndex);
+  } else {
+    res.sendFile(publicIndex);
+  }
 });
 
 app.listen(PORT, () => {
